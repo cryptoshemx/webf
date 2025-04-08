@@ -1,0 +1,758 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Mercado Binance Futures</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        /* Estilos generales */
+        body {
+            background-color: #121212;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Estilos de tarjetas */
+        .card {
+            background-color: #1e1e1e;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+        .card-header {
+            background-color: #2a2a2a;
+            border-bottom: 1px solid #333;
+            padding: 12px 15px;
+            font-weight: 600;
+        }
+        
+        /* Estilos de tablas */
+        table {
+            color: #f0f0f0 !important;
+        }
+        .table-dark {
+            background-color: #252525;
+        }
+        .table-dark th {
+            background-color: #2a2a2a;
+        }
+        
+        /* Estilos de indicadores de estado */
+        .status-above {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        .status-below {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .btc-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .btc-above {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid rgba(76, 175, 80, 0.5);
+        }
+        .btc-below {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.5);
+        }
+        
+        /* Estilos de RSI */
+        .rsi-overbought {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            font-weight: bold;
+        }
+        .rsi-oversold {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        /* Estilos de pestañas */
+        .timeframe-tabs {
+            margin-bottom: 20px;
+        }
+        .timeframe-tabs .nav-link {
+            color: #ccc;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+        .timeframe-tabs .nav-link.active {
+            background-color: #2a2a2a;
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        /* Estilos de cambio de precio */
+        .price-up {
+            color: #4caf50;
+        }
+        .price-down {
+            color: #f44336;
+        }
+        
+        /* Estilos varios */
+        .last-update {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: 15px;
+        }
+        .volume-badge {
+            background-color: #333;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        .dashboard-header {
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+        
+        /* Estilos de carga */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .loading-text {
+            margin-top: 15px;
+            font-size: 1.2rem;
+        }
+        
+        /* Estilos para el menú lateral */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100vh;
+            background-color: #1a1a1a;
+            transition: all 0.3s ease;
+            z-index: 9998;
+            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+        .sidebar-header {
+            padding: 20px;
+            background-color: #0f0f0f;
+            border-bottom: 1px solid #333;
+        }
+        .sidebar-menu {
+            padding: 0;
+            list-style: none;
+            margin: 0;
+        }
+        .sidebar-menu li {
+            padding: 0;
+            border-bottom: 1px solid #333;
+            transition: all 0.2s ease;
+        }
+        .sidebar-menu li:hover {
+            background-color: #2c2c2c;
+        }
+        .sidebar-menu a {
+            color: #ccc;
+            text-decoration: none;
+            display: block;
+            padding: 15px 20px;
+            font-size: 1rem;
+        }
+        .sidebar-menu a i {
+            margin-right: 10px;
+        }
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 9997;
+            display: none;
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+        .toggle-sidebar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9996;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .toggle-sidebar:hover {
+            background-color: #444;
+        }
+        
+        /* Ajuste del contenido principal cuando el sidebar está activo */
+        .content-wrapper {
+            transition: all 0.3s ease;
+            padding-left: 0;
+        }
+        .content-wrapper.sidebar-active {
+            padding-left: 250px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay de carga -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <div class="loading-text">Inicializando análisis de mercado...</div>
+    </div>
+    
+    <!-- Menú lateral (Sidebar) -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h4>Binance Analyzer</h4>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="#" id="dashboard-link"><i class="bi bi-grid-1x2"></i> Dashboard</a></li>
+            <li><a href="#" id="settings-link"><i class="bi bi-gear"></i> Configuración</a></li>
+            <li><a href="#" id="alerts-link"><i class="bi bi-bell"></i> Alertas</a></li>
+            <li><a href="#" id="portfolio-link"><i class="bi bi-briefcase"></i> Portfolio</a></li>
+            <li><a href="#" id="strategies-link"><i class="bi bi-graph-up"></i> Estrategias</a></li>
+            <li><a href="#" id="history-link"><i class="bi bi-clock-history"></i> Historial</a></li>
+        </ul>
+    </div>
+    
+    <!-- Overlay para cerrar el sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Botón para abrir/cerrar el sidebar -->
+    <button class="toggle-sidebar" id="toggleSidebar">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Contenedor principal -->
+    <div class="content-wrapper" id="contentWrapper">
+        <div class="container-fluid">
+            <!-- Cabecera del dashboard -->
+            <div class="dashboard-header">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h2>Análisis de Mercado Binance Futures</h2>
+                        <p class="text-muted">Análisis en tiempo real de los activos USDT en función de BTC</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div id="btcSummary" class="d-flex justify-content-end align-items-center">
+                            <div class="btc-price"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs para timeframes -->
+            <ul class="nav nav-tabs timeframe-tabs" id="timeframeTabs" role="tablist">
+                <!-- Los tabs se generarán dinámicamente con JavaScript -->
+            </ul>
+
+            <!-- Contenido de los tabs -->
+            <div class="tab-content" id="timeframeTabContent">
+                <!-- El contenido se generará dinámicamente con JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        /**
+         * Variables globales
+         */
+        // Socket para comunicación en tiempo real
+        const socket = io();
+        
+        // Orden predefinido de timeframes
+        const timeframeOrder = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d', '1w', '1M'];
+        
+        // Lista de todos los timeframes disponibles
+        const allTimeframes = [];
+        
+        // Valores de precios anteriores para calcular cambios
+        const previousPrices = {};
+
+        /**
+         * Funciones para el menú lateral
+         */
+        // Función para inicializar el sidebar
+        function initSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const toggleSidebar = document.getElementById('toggleSidebar');
+            const contentWrapper = document.getElementById('contentWrapper');
+            
+            // Función para abrir/cerrar el sidebar
+            function toggleSidebarState() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+                contentWrapper.classList.toggle('sidebar-active');
+            }
+            
+            // Event listeners
+            toggleSidebar.addEventListener('click', toggleSidebarState);
+            sidebarOverlay.addEventListener('click', toggleSidebarState);
+            
+            // Event listeners para elementos del menú
+            document.querySelectorAll('.sidebar-menu a').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Cerrar sidebar en dispositivos móviles
+                    if (window.innerWidth < 992) {
+                        toggleSidebarState();
+                    }
+                    
+                    // Aquí puedes manejar la navegación a diferentes secciones
+                    const menuId = this.id;
+                    
+                    // Solo como ejemplo, podrás implementar las distintas secciones
+                    console.log(`Navegando a: ${menuId}`);
+                    
+                    // Por ahora, solo cambiamos a dashboard para todos
+                    if (menuId !== 'dashboard-link') {
+                        alert('Esta sección está en desarrollo. Disponible próximamente.');
+                    }
+                });
+            });
+        }
+
+        /**
+         * Funciones de formateo y utilidades
+         */
+        
+        /**
+         * Formatea un número con decimales específicos
+         * @param {number} num - Número a formatear
+         * @param {number} decimals - Cantidad de decimales
+         * @returns {string} Número formateado
+         */
+        function formatNumber(num, decimals = 2) {
+            return parseFloat(num).toFixed(decimals);
+        }
+        
+        /**
+         * Formatea un volumen para mostrar K, M, B
+         * @param {number} volume - Volumen a formatear
+         * @returns {string} Volumen formateado
+         */
+        function formatVolume(volume) {
+            if (volume >= 1000000000) {
+                return (volume / 1000000000).toFixed(2) + ' B';
+            } else if (volume >= 1000000) {
+                return (volume / 1000000).toFixed(2) + ' M';
+            } else if (volume >= 1000) {
+                return (volume / 1000).toFixed(2) + ' K';
+            } else {
+                return volume.toFixed(2);
+            }
+        }
+        
+        /**
+         * Formatea una fecha en hora local
+         * @param {number} timestamp - Timestamp a formatear
+         * @returns {string} Hora formateada
+         */
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString();
+        }
+        
+        /**
+         * Determina la clase CSS para el cambio de precio
+         * @param {string} symbol - Símbolo del activo
+         * @param {string} timeframe - Timeframe
+         * @param {number} currentPrice - Precio actual
+         * @returns {string} Clase CSS
+         */
+        function getPriceChangeClass(symbol, timeframe, currentPrice) {
+            const key = `${symbol}-${timeframe}`;
+            
+            if (!previousPrices[key]) {
+                previousPrices[key] = currentPrice;
+                return '';
+            }
+            
+            const prevPrice = previousPrices[key];
+            previousPrices[key] = currentPrice;
+            
+            if (currentPrice > prevPrice) {
+                return 'price-up';
+            } else if (currentPrice < prevPrice) {
+                return 'price-down';
+            }
+            
+            return '';
+        }
+
+        /**
+         * Funciones de actualización de la interfaz
+         */
+        
+        /**
+         * Actualiza la tabla de activos para un timeframe específico
+         * @param {string} timeframe - Timeframe a actualizar
+         * @param {Object} data - Datos de análisis
+         */
+        function updateAssetsTable(timeframe, data) {
+            if (!data) return;
+            
+            const tableBody = document.getElementById(`assets-table-${timeframe}`);
+            const lastUpdateEl = document.getElementById(`last-update-${timeframe}`);
+            
+            if (tableBody && data.matchingAssets) {
+                // Actualizar el timestamp de última actualización
+                if (lastUpdateEl && data.updated) {
+                    lastUpdateEl.textContent = `Última actualización: ${formatDate(data.updated)}`;
+                }
+                
+                // Limpiar tabla
+                tableBody.innerHTML = '';
+                
+                // Si no hay activos que cumplan los criterios
+                const filteredAssets = data.matchingAssets.filter(asset => asset.symbol !== 'BTCUSDT');
+                
+                if (filteredAssets.length === 0) {
+                    const row = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.colSpan = 8; // Ajustado para incluir RSI
+                    cell.className = 'text-center';
+                    cell.textContent = 'No hay activos que cumplan los criterios en este timeframe';
+                    row.appendChild(cell);
+                    tableBody.appendChild(row);
+                    return;
+                }
+                
+                // Agregar filas para cada activo
+                filteredAssets.forEach(asset => {
+                    const row = document.createElement('tr');
+                    
+                    // Obtener clase para el cambio de precio
+                    const priceChangeClass = getPriceChangeClass(asset.symbol, timeframe, asset.price);
+                    
+                    // Determinar clase CSS para el RSI
+                    let rsiClass = '';
+                    if (asset.rsi >= 70) {
+                        rsiClass = 'rsi-overbought'; // Sobrecomprado (rojo)
+                    } else if (asset.rsi <= 30) {
+                        rsiClass = 'rsi-oversold'; // Sobrevendido (verde)
+                    }
+                    
+                    row.innerHTML = `
+                        <td><strong>${asset.symbol}</strong></td>
+                        <td class="${priceChangeClass}">${formatNumber(asset.price, 8)}</td>
+                        <td><span class="volume-badge">${formatVolume(asset.volumeUSDT)}</span></td>
+                        <td class="${rsiClass}">${asset.rsi ? formatNumber(asset.rsi, 2) : 'N/A'}</td>
+                        <td>${formatNumber(asset.ma20, 8)}</td>
+                        <td>${formatNumber(asset.ma50, 8)}</td>
+                        <td>${formatNumber(asset.ma200, 8)}</td>
+                        <td><span class="status-${asset.status}">${asset.status === 'above' ? '▲ ENCIMA' : '▼ DEBAJO'}</span></td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            }
+        }
+        
+        /**
+         * Actualiza el resumen de BTC
+         * @param {string} timeframe - Timeframe activo
+         * @param {Object} data - Datos de análisis
+         */
+        function updateBTCSummary(timeframe, data) {
+            if (!data) return;
+            
+            const btcSummaryEl = document.getElementById('btcSummary');
+            if (!btcSummaryEl) return;
+            
+            // Solo actualizar para el timeframe activo
+            const activeTab = document.querySelector('.tab-pane.active');
+            if (!activeTab || activeTab.id !== `tf-${timeframe}-content`) return;
+            
+            btcSummaryEl.innerHTML = '';
+            
+            // Precio BTC
+            const priceEl = document.createElement('div');
+            priceEl.className = 'btc-price me-3';
+            priceEl.innerHTML = `<strong>BTC/USDT:</strong> ${formatNumber(data.btcPrice, 2)} USDT`;
+            btcSummaryEl.appendChild(priceEl);
+            
+            // Indicadores BTC
+            const ma20El = document.createElement('div');
+            ma20El.className = `btc-indicator btc-${data.btcStatus.ma20}`;
+            ma20El.textContent = `MA20: ${data.btcStatus.ma20.toUpperCase()}`;
+            btcSummaryEl.appendChild(ma20El);
+            
+            const ma50El = document.createElement('div');
+            ma50El.className = `btc-indicator btc-${data.btcStatus.ma50}`;
+            ma50El.textContent = `MA50: ${data.btcStatus.ma50.toUpperCase()}`;
+            btcSummaryEl.appendChild(ma50El);
+            
+            const ma200El = document.createElement('div');
+            ma200El.className = `btc-indicator btc-${data.btcStatus.ma200}`;
+            ma200El.textContent = `MA200: ${data.btcStatus.ma200.toUpperCase()}`;
+            btcSummaryEl.appendChild(ma200El);
+            
+            // Añadir información sobre el criterio de selección
+            const infoEl = document.createElement('div');
+            infoEl.className = 'ms-4 mt-2 text-muted';
+            infoEl.innerHTML = `<small>Mostrando activos con comportamiento opuesto a BTC.</small>`;
+            btcSummaryEl.appendChild(infoEl);
+        }
+        
+        /**
+         * Genera las pestañas para los timeframes
+         * @param {Array} timeframes - Lista de timeframes
+         */
+        function generateTimeframeTabs(timeframes) {
+            const tabsContainer = document.getElementById('timeframeTabs');
+            const tabContentContainer = document.getElementById('timeframeTabContent');
+            
+            tabsContainer.innerHTML = '';
+            tabContentContainer.innerHTML = '';
+            
+            // Ordenar timeframes según el orden predefinido
+            timeframes.sort((a, b) => {
+                return timeframeOrder.indexOf(a) - timeframeOrder.indexOf(b);
+            });
+            
+            // Almacenar la lista completa de timeframes
+            allTimeframes.length = 0;
+            allTimeframes.push(...timeframes);
+            
+            // Crear pestañas
+            timeframes.forEach((timeframe, index) => {
+                // Tab
+                const isActive = index === 0;
+                const li = document.createElement('li');
+                li.className = 'nav-item';
+                li.role = 'presentation';
+                
+                // Crear ID válido: los ID en HTML no pueden empezar con números
+                const tabId = `tf-${timeframe}-tab`;
+                const contentId = `tf-${timeframe}-content`;
+                
+                const button = document.createElement('button');
+                button.className = `nav-link ${isActive ? 'active' : ''}`;
+                button.id = tabId;
+                button.dataset.bsToggle = 'tab';
+                button.dataset.bsTarget = `#${contentId}`;
+                button.type = 'button';
+                button.role = 'tab';
+                button.setAttribute('aria-controls', contentId);
+                button.setAttribute('aria-selected', isActive);
+                button.textContent = timeframe.toUpperCase();
+                
+                li.appendChild(button);
+                tabsContainer.appendChild(li);
+                
+                // Tab content
+                const tabContent = document.createElement('div');
+                tabContent.className = `tab-pane fade ${isActive ? 'show active' : ''}`;
+                tabContent.id = contentId;
+                tabContent.role = 'tabpanel';
+                tabContent.setAttribute('aria-labelledby', tabId);
+                
+                // Card dentro del contenido
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                const cardHeader = document.createElement('div');
+                cardHeader.className = 'card-header d-flex justify-content-between align-items-center';
+                
+                const headerTitle = document.createElement('span');
+                headerTitle.innerHTML = `Activos con MA opuestas a BTC en timeframe <strong>${timeframe.toUpperCase()}</strong>`;
+                
+                const lastUpdate = document.createElement('span');
+                lastUpdate.className = 'last-update';
+                lastUpdate.id = `last-update-${timeframe}`;
+                lastUpdate.textContent = 'Actualizando...';
+                
+                cardHeader.appendChild(headerTitle);
+                cardHeader.appendChild(lastUpdate);
+                
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+                
+                // Tabla de activos
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'table-responsive';
+                
+                const table = document.createElement('table');
+                table.className = 'table table-dark table-hover';
+                
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                    <tr>
+                        <th scope="col">Activo</th>
+                        <th scope="col">Precio</th>
+                        <th scope="col">Volumen (USDT)</th>
+                        <th scope="col">RSI</th>
+                        <th scope="col">MA20</th>
+                        <th scope="col">MA50</th>
+                        <th scope="col">MA200</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                `;
+                
+                const tbody = document.createElement('tbody');
+                tbody.id = `assets-table-${timeframe}`;
+                
+                table.appendChild(thead);
+                table.appendChild(tbody);
+                tableContainer.appendChild(table);
+                cardBody.appendChild(tableContainer);
+                
+                card.appendChild(cardHeader);
+                card.appendChild(cardBody);
+                
+                tabContent.appendChild(card);
+                tabContentContainer.appendChild(tabContent);
+            });
+        }
+        
+        /**
+         * Procesa los datos de análisis y actualiza la interfaz
+         * @param {Object} analysisData - Datos de análisis
+         */
+        function processAnalysisData(analysisData) {
+            // Ocultar overlay de carga
+            document.getElementById('loadingOverlay').style.display = 'none';
+            
+            // Si no hay datos, no hacer nada
+            if (!analysisData) return;
+            
+            // Obtener los timeframes disponibles
+            const timeframes = Object.keys(analysisData);
+            
+            // Si es la primera vez, generar las pestañas
+            if (allTimeframes.length === 0) {
+                generateTimeframeTabs(timeframes);
+                
+                // Agregar eventos a las pestañas
+                document.querySelectorAll('#timeframeTabs button').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        // Extraer el timeframe del ID (formato: tf-{timeframe}-tab)
+                        const timeframe = this.id.replace('tf-', '').replace('-tab', '');
+                        const data = analysisData[timeframe];
+                        if (data) {
+                            updateBTCSummary(timeframe, data);
+                        }
+                    });
+                });
+            }
+            
+            // Actualizar cada tabla de activos
+            timeframes.forEach(timeframe => {
+                updateAssetsTable(timeframe, analysisData[timeframe]);
+            });
+            
+            // Actualizar el resumen de BTC para el timeframe activo
+            const activeTab = document.querySelector('.tab-pane.active');
+            if (activeTab) {
+                // Extraer el timeframe del ID (formato: tf-{timeframe}-content)
+                const activeTimeframe = activeTab.id.replace('tf-', '').replace('-content', '');
+                if (analysisData[activeTimeframe]) {
+                    updateBTCSummary(activeTimeframe, analysisData[activeTimeframe]);
+                }
+            }
+        }
+
+        /**
+         * Configuración de Socket.IO y eventos
+         */
+        
+        // Evento de conexión
+        socket.on('connect', () => {
+            console.log('Conectado al servidor');
+        });
+        
+        // Recepción de datos iniciales
+        socket.on('initialData', (data) => {
+            console.log('Datos iniciales recibidos:', data);
+            
+            // Si recibimos el objeto assets pero el analysis está vacío, mostrar un mensaje de espera
+            if (data.assets && Object.keys(data.assets).length > 0 && 
+                (!data.analysis || Object.keys(data.analysis).length === 0)) {
+                console.log('Se recibieron activos pero aún no hay análisis disponible. Esperando datos...');
+            }
+            
+            if (data.analysis && Object.keys(data.analysis).length > 0) {
+                processAnalysisData(data.analysis);
+            } else {
+                // Si no hay datos de análisis, solicitamos un análisis inmediato
+                socket.emit('requestAnalysis', true);
+            }
+        });
+        
+        // Actualizaciones de análisis
+        socket.on('analysisUpdate', (analysisData) => {
+            console.log('Actualización de análisis recibida:', 
+                        Object.keys(analysisData).length > 0 ? 
+                        `Contiene datos para ${Object.keys(analysisData).length} timeframes. BTC 1m: ${analysisData['1m']?.btcPrice || 'N/A'}` : 
+                        'Vacío');
+            
+            if (Object.keys(analysisData).length > 0) {
+                processAnalysisData(analysisData);
+            }
+        });
+        
+        // Evento de desconexión
+        socket.on('disconnect', () => {
+            console.log('Desconectado del servidor');
+            
+            // Mostrar mensaje de desconexión
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.querySelector('.loading-text').textContent = 'Conexión perdida. Reconectando...';
+        });
+        
+        // Inicializar sidebar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', initSidebar);
+    </script>
+</body>
+</html>
