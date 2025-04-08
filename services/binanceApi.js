@@ -4,13 +4,36 @@ const axios = require('axios');
 const { marketData } = require('../models/marketData');
 const config = require('../config/config');
 const indicators = require('./indicators');
+const fs = require('fs');
+const path = require('path'); // Para manejar rutas de archivos
 
 /**
  * Obtiene todos los activos USDT en estado TRADING
  * @returns {Promise<Array>} Lista de símbolos de activos
  */
 async function getUSDTFuturesAssets() {
-  try {
+  const filePath = path.join(__dirname, 'usdtAssets.json'); // Ruta al archivo JSON donde guardarás los datos
+  // Verificar si el archivo existe
+  if (fs.existsSync(filePath)) {
+    console.log('Leyendo activos USDT desde el archivo...');
+
+    // Leer el archivo JSON si existe
+    const data = fs.readFileSync(filePath, 'utf8');
+    const usdtAssets = JSON.parse(data); // Convertir la cadena JSON en un objeto
+
+    usdtAssets.forEach(asset => {
+      marketData.assets[asset.symbol] = {
+        symbol: asset.symbol,
+        baseAsset: asset.baseAsset,
+        quoteAsset: asset.quoteAsset,
+        pricePrecision: asset.pricePrecision,
+        quantityPrecision: asset.quantityPrecision
+      };
+    });
+    
+    return usdtAssets.map(asset => asset.symbol);
+  }else{
+    try {
     const response = await axios.get(config.apiUrls.futuresExchangeInfo);
     const symbols = response.data.symbols;
     
@@ -32,12 +55,18 @@ async function getUSDTFuturesAssets() {
         quantityPrecision: asset.quantityPrecision
       };
     });
+
+    fs.writeFileSync(filePath, JSON.stringify(usdtAssets, null, 2)); // Guarda los activos en el archivo
     
     return usdtAssets.map(asset => asset.symbol);
+
   } catch (error) {
     console.error('Error al obtener activos USDT:', error);
     return [];
   }
+  }
+
+  
 }
 
 /**
